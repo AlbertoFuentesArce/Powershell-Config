@@ -107,6 +107,10 @@ function pgrep($name) {
     Get-Process $name
 }
 
+function clear {
+    [console]::Clear()
+}
+
 function touch { 
     param (
         [string]$FileName, # The name of the file to create 
