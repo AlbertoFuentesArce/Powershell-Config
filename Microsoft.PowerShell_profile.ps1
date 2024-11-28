@@ -23,8 +23,6 @@ Set-PSReadLineKeyHandler -Chord 'Ctrl+y' -Function Redo
 
 Set-PSReadLineOption -PredictionSource HistoryAndPlugin
 Set-PSReadLineOption -MaximumHistoryCount 5000
-Set-PSReadLineOption -HistoryNoDuplicates $true
-
 
 Set-PSReadLineKeyHandler -Chord "Ctrl+f" -Function ForwardWord
 Set-PSReadLineOption -Colors @{ InlinePrediction = '#8A0303'}
