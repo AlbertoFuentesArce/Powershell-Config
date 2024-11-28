@@ -111,6 +111,10 @@ function clear {
     [console]::Clear()
 }
 
+function ls {
+    Get-ChildItem @args | Format-Table -Property Name, Mode, Length, LastWriteTime -AutoSize
+}
+
 function touch { 
     param (
         [string]$FileName, # The name of the file to create 
