@@ -135,45 +135,6 @@ function touch {
                 "" | Out-File -FilePath $FilePath -Encoding UTF8
         }
 
-        ".xlsx" {
-            # Create an Excel file
-            try {
-                # Initialize the Excel COM object
-                $Excel = New-Object -ComObject Excel.Application
-                $Workbook = $Excel.Workbooks.Add()
-        
-                # Ensure the file path includes the .xlsx extension
-                if (-not $FilePath.EndsWith(".xlsx")) {
-                    $FilePath += ".xlsx"
-                }
-        
-                # Save the workbook as an .xlsx file
-                $Workbook.SaveAs($FilePath, 51)  # 51 = xlOpenXMLWorkbook (.xlsx)
-        
-                Write-Host "Created new Excel file: $FilePath" -ForegroundColor Green
-            } catch {
-                # Handle errors gracefully
-                Write-Error "Failed to create Excel file: $_"
-            } finally {
-                # Close the workbook if it was created
-                if ($Workbook) {
-                    $Workbook.Close($false)
-                    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($Workbook) | Out-Null
-                }
-        
-                # Quit Excel and release the COM object
-                if ($Excel) {
-                    $Excel.Quit()
-                    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($Excel) | Out-Null
-                }
-        
-                # Perform garbage collection to finalize cleanup
-                [GC]::Collect()
-                [GC]::WaitForPendingFinalizers()
-            }
-        }
-
-         
         ".txt" {
             # Plain text file
             "" | Out-File -FilePath $FilePath -Encoding UTF8
