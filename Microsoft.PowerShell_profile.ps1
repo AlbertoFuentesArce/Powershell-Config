@@ -96,6 +96,7 @@ function grep($regex, $dir) {
     if (Get-Command 'zoxide' -ErrorAction SilentlyContinue) {
         if ($dir) {
             try {
+                # Try to resolve the alias to a full path using zoxide
                 $resolvedDir = zoxide query $dir
                 if ($resolvedDir) {
                     $dir = $resolvedDir
@@ -106,15 +107,15 @@ function grep($regex, $dir) {
         }
     }
 
-    # If a directory is provided, search the files within it
-    if ($dir) {
-        Get-ChildItem $dir | Select-String $regex
-        return
+    # If no directory is provided, use the current directory (.)
+    if (-not $dir) {
+        $dir = Get-Location
     }
 
-    # If no directory, search from the pipeline input
-    $input | Select-String $regex
+    # If a directory is provided, search the files within it
+    Get-ChildItem -Path $dir -Recurse | Select-String $regex
 }
+
 
 
 function pkill($name) {
