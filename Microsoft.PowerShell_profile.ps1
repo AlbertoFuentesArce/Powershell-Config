@@ -22,7 +22,8 @@ Set-PSReadLineKeyHandler -Chord 'Ctrl+z' -Function Undo
 Set-PSReadLineKeyHandler -Chord 'Ctrl+y' -Function Redo
 
 Set-PSReadLineOption -PredictionSource HistoryAndPlugin
-Set-PSReadLineOption -MaximumHistoryCount 10000
+Set-PSReadLineOption -MaximumHistoryCount 5000
+Set-PSReadLineOption -HistoryNoDuplicates $true
 
 
 Set-PSReadLineKeyHandler -Chord "Ctrl+f" -Function ForwardWord
