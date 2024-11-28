@@ -92,12 +92,30 @@ function admin {
 }
 
 function grep($regex, $dir) {
-    if ( $dir ) {
-        Get-ChildItem $dir | select-string $regex
+    # Resolve the path if it's a zoxide alias
+    if (Get-Command 'zoxide' -ErrorAction SilentlyContinue) {
+        if ($dir) {
+            try {
+                $resolvedDir = zoxide query $dir
+                if ($resolvedDir) {
+                    $dir = $resolvedDir
+                }
+            } catch {
+                Write-Warning "zoxide query failed for alias '$dir'. Using the provided path."
+            }
+        }
+    }
+
+    # If a directory is provided, search the files within it
+    if ($dir) {
+        Get-ChildItem $dir | Select-String $regex
         return
     }
-    $input | select-string $regex
+
+    # If no directory, search from the pipeline input
+    $input | Select-String $regex
 }
+
 
 function pkill($name) {
     Get-Process $name -ErrorAction SilentlyContinue | Stop-Process
