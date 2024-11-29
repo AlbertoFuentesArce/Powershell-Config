@@ -178,8 +178,8 @@ function touch {
 
 function mv {
     param (
-        [string]$Source,        # The source file or folder
-        [string]$Destination    # The destination path (or zoxide alias)
+        [string]$Source,        # Source file or folder
+        [string]$Destination    # Destination path (or zoxide alias)
     )
 
     # Resolve the source path if it's a zoxide alias
@@ -212,11 +212,11 @@ function mv {
         $Destination = Join-Path -Path $Destination -ChildPath (Split-Path $Source -Leaf)
     }
 
-    # Handle overwriting existing files
+    # Handle existing destination file conflicts
     if (Test-Path $Destination -PathType Leaf) {
         try {
-            # Remove the existing file before moving
             Remove-Item -Path $Destination -Force
+            Write-Host "Removed existing file at destination: $Destination" -ForegroundColor Yellow
         } catch {
             Write-Error "Failed to overwrite existing file '$Destination': $_"
             return
@@ -225,12 +225,13 @@ function mv {
 
     # Perform the move operation
     try {
-        Move-Item -Path $Source -Destination $Destination -Force
+        Move-Item -Path $Source -Destination $Destination
         Write-Host "Moved: $Source -> $Destination" -ForegroundColor Green
     } catch {
         Write-Error "Failed to move '$Source' to '$Destination': $_"
     }
 }
+
 
 
 
