@@ -178,8 +178,8 @@ function touch {
 
 function mv {
     param (
-        [string]$Source,   # The source file or folder
-        [string]$Destination # The destination path
+        [string]$Source,        # The source file or folder
+        [string]$Destination    # The destination path (or zoxide alias)
     )
 
     # Resolve the source path if it's a zoxide alias
@@ -206,25 +206,32 @@ function mv {
         }
     }
 
-    # Handle moving files or directories
-    try {
-        if (Test-Path $Destination) {
-            # If the destination exists and is a directory, move into it
-            if ((Get-Item $Destination).PSIsContainer) {
-                $Destination = Join-Path -Path $Destination -ChildPath (Split-Path $Source -Leaf)
-            } else {
-                Write-Error "Destination exists and is not a directory: $Destination"
-                return
-            }
-        }
+    # Check if the destination is a directory
+    if (Test-Path $Destination -PathType Container) {
+        # Append the source file name to the destination if it's a directory
+        $Destination = Join-Path -Path $Destination -ChildPath (Split-Path $Source -Leaf)
+    }
 
-        # Perform the move operation
-        Move-Item -Path $Source -Destination $Destination -ErrorAction Stop
+    # Handle overwriting existing files
+    if (Test-Path $Destination -PathType Leaf) {
+        try {
+            # Remove the existing file before moving
+            Remove-Item -Path $Destination -Force
+        } catch {
+            Write-Error "Failed to overwrite existing file '$Destination': $_"
+            return
+        }
+    }
+
+    # Perform the move operation
+    try {
+        Move-Item -Path $Source -Destination $Destination -Force
         Write-Host "Moved: $Source -> $Destination" -ForegroundColor Green
     } catch {
         Write-Error "Failed to move '$Source' to '$Destination': $_"
     }
 }
+
 
 
 function mvd {
