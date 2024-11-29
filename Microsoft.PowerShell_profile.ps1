@@ -178,11 +178,11 @@ function touch {
 
 function mv {
     param (
-        [string]$Source,        # Source file or folder
-        [string]$Destination    # Destination path (or zoxide alias)
+        [string]$Source,        # The source file or directory
+        [string]$Destination    # The destination path (or zoxide alias)
     )
 
-    # Resolve the source path if it's a zoxide alias
+    # Resolve source path (if it's a zoxide alias)
     if (Get-Command zoxide -ErrorAction SilentlyContinue) {
         try {
             $ResolvedSource = zoxide query $Source
@@ -194,7 +194,7 @@ function mv {
         }
     }
 
-    # Resolve the destination path if it's a zoxide alias
+    # Resolve destination path (if it's a zoxide alias)
     if (Get-Command zoxide -ErrorAction SilentlyContinue) {
         try {
             $ResolvedDestination = zoxide query $Destination
@@ -206,26 +206,32 @@ function mv {
         }
     }
 
+    # Validate if the source exists
+    if (-not (Test-Path $Source)) {
+        Write-Error "Source '$Source' does not exist."
+        return
+    }
+
     # Check if the destination is a directory
     if (Test-Path $Destination -PathType Container) {
-        # Append the source file name to the destination if it's a directory
+        # Append source file name if the destination is a directory
         $Destination = Join-Path -Path $Destination -ChildPath (Split-Path $Source -Leaf)
     }
 
-    # Handle existing destination file conflicts
+    # Handle file overwrite conflicts
     if (Test-Path $Destination -PathType Leaf) {
         try {
             Remove-Item -Path $Destination -Force
             Write-Host "Removed existing file at destination: $Destination" -ForegroundColor Yellow
         } catch {
-            Write-Error "Failed to overwrite existing file '$Destination': $_"
+            Write-Error "Failed to remove existing file at destination: $Destination"
             return
         }
     }
 
     # Perform the move operation
     try {
-        Move-Item -Path $Source -Destination $Destination
+        Move-Item -Path $Source -Destination $Destination -Force
         Write-Host "Moved: $Source -> $Destination" -ForegroundColor Green
     } catch {
         Write-Error "Failed to move '$Source' to '$Destination': $_"
