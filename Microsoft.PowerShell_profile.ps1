@@ -206,20 +206,20 @@ function mv {
         }
     }
 
-    # If the destination path doesn't exist, create it (for folders)
-    if (-not (Test-Path $Destination) -and (Test-Path (Split-Path $Destination -Parent))) {
-        try {
-            New-Item -ItemType Directory -Path $Destination | Out-Null
-            Write-Host "Created destination directory: $Destination" -ForegroundColor Green
-        } catch {
-            Write-Error "Failed to create destination directory: $Destination"
-            return
-        }
-    }
-
-    # Perform the move operation
+    # Handle moving files or directories
     try {
-        Move-Item -Path $Source -Destination $Destination
+        if (Test-Path $Destination) {
+            # If the destination exists and is a directory, move into it
+            if ((Get-Item $Destination).PSIsContainer) {
+                $Destination = Join-Path -Path $Destination -ChildPath (Split-Path $Source -Leaf)
+            } else {
+                Write-Error "Destination exists and is not a directory: $Destination"
+                return
+            }
+        }
+
+        # Perform the move operation
+        Move-Item -Path $Source -Destination $Destination -ErrorAction Stop
         Write-Host "Moved: $Source -> $Destination" -ForegroundColor Green
     } catch {
         Write-Error "Failed to move '$Source' to '$Destination': $_"
