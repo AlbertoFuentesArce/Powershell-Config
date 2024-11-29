@@ -176,6 +176,57 @@ function touch {
 
 }
 
+function mv {
+    param (
+        [string]$Source,   # The source file or folder
+        [string]$Destination # The destination path
+    )
+
+    # Resolve the source path if it's a zoxide alias
+    if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+        try {
+            $ResolvedSource = zoxide query $Source
+            if ($ResolvedSource) {
+                $Source = $ResolvedSource
+            }
+        } catch {
+            Write-Warning "zoxide query failed for source '$Source'. Using the provided source path."
+        }
+    }
+
+    # Resolve the destination path if it's a zoxide alias
+    if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+        try {
+            $ResolvedDestination = zoxide query $Destination
+            if ($ResolvedDestination) {
+                $Destination = $ResolvedDestination
+            }
+        } catch {
+            Write-Warning "zoxide query failed for destination '$Destination'. Using the provided destination path."
+        }
+    }
+
+    # If the destination path doesn't exist, create it (for folders)
+    if (-not (Test-Path $Destination) -and (Test-Path (Split-Path $Destination -Parent))) {
+        try {
+            New-Item -ItemType Directory -Path $Destination | Out-Null
+            Write-Host "Created destination directory: $Destination" -ForegroundColor Green
+        } catch {
+            Write-Error "Failed to create destination directory: $Destination"
+            return
+        }
+    }
+
+    # Perform the move operation
+    try {
+        Move-Item -Path $Source -Destination $Destination
+        Write-Host "Moved: $Source -> $Destination" -ForegroundColor Green
+    } catch {
+        Write-Error "Failed to move '$Source' to '$Destination': $_"
+    }
+}
+
+
 function mvd {
     param(
         [int]$c=1,
