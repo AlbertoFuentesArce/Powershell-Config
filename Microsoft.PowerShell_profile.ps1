@@ -129,8 +129,9 @@ function clear {
     [console]::Clear()
 }
 
+
 function ls {
-    Get-ChildItem @args | Format-Table -Property Name, Mode, Length, LastWriteTime -AutoSize
+    Get-ChildItem @args | Select-Object Name, Mode, Length, LastWriteTime
 }
 
 function touch { 
